@@ -1,23 +1,20 @@
 #'-----------------------------------------------------------------------------------#
 #' adjusting field trial phenotypes
-#  the vector of cultivars/genotypes must be written as gid
+#' the vector of cultivars/genotypes must be written as gid
+#' type = c("FIXED","MIXED")
 #'-----------------------------------------------------------------------------------#
 adjust.y = function(df,yform,comps,type="FIXED"){
- 
-   #' step1: create outputs
+  
+  #' step1: create outputs
   ngid=nlevels(df$gid)
-  y=data.frame()
   yform=as.formula(yform)
   
   #' step2: provide computations
-  for(j in 1:ngid){
-    
-    if(type=="FIXED"){m = try(lm(yform,df))}
-    if(type=="MIXED"){m = try(lmer(yform,df))}
+  if(type=="FIXED"){m = try(lm(yform,df))}
+  if(type=="MIXED"){m = try(lmer(yform,df))}
     
   #' step3: returning output
-    y = rbind(y,data.frame(try(emmeans(m,specs = comps))))
-  }
+  y = data.frame(try(emmeans(m,specs = comps)))
   return(y)
 }
 # usage (NOT RUN):
