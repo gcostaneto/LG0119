@@ -1,0 +1,12 @@
+#' adjusting field trial phenotypes
+# the vector of cultivars/genotypes must be written as gid
+adjust.y = function(df,yform,comps){
+  ngid=nlevels(df$gid)
+  y=data.frame()
+  yform=as.formula(yform)
+  for(j in 1:ngid){
+    m = try(lm(yform,df))
+    y = rbind(y,data.frame(try(emmeans(m,specs = comps))))
+  }
+  return(y)
+}
