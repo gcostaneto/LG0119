@@ -41,6 +41,19 @@ y.adjuste = function(Gid,Env,value,stand= NULL,df){
   return(Y)
 }
 
+head.df = function(LG,gid){
+  
+  lgid = levels(gid)
+  df = NULL
+  
+  for(j in 1:length(LG)){
+    a = lgid[!lgid %in% LG[j]]
+    df=rbind(df,data.frame(LG=LG[j],C=a))
+  }
+  return(df)
+}
+
+
 # necessita adaptacao para dataframe
 head.to.head = function(by=20,df.t,LG, C, path = getwd(),
                          Regiao, full=T, smoot=F){
