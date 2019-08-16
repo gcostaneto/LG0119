@@ -55,24 +55,41 @@ head.df = function(LG,gid){
 
 
 # necessita adaptacao para dataframe
-head.to.head = function(by=20,df.t,LG, C, path = getwd(),
-                         Regiao, full=T, smoot=F){
-  
-  df.t = df.t[,c(LG,C,Regiao)]
+head.to.head = function(by=20,
+                        df.H,
+                        df.Y,
+                        LG, 
+                        C, 
+                        path = getwd(),
+                        site = "Cidade",
+                        env="env.mean",
+                        gid="gid",
+                        y = "value",
+                      Regiao, full=T, smoot=F){
+  #'---------------------------------------------------------------#
+  df.t = df.H[,c(LG,C)]
+  df.y = df.Y[,c(env,site,gid,y)]
+  names(df.y) = c("env","Cidade","gid","value")
+  #'---------------------------------------------------------------#
   
   for(K in 1:nrow(df.t)){
-    Regiao = as.character(df.t$Regiao[K])
-    LG = as.character(df.t$LG[K])
-    C = as.character(df.t$C[K])
-    nome = paste(Regiao,LG,"x",C,sep=" ")
-    cat(paste("Figura ",nome,"\n",sep=""))
     
-    (J = df[df$Hibrido%in%c(LG,C),])
+    Regiao = as.character(df.t$Regiao[K])
+    LG     = as.character(df.t$LG[K])
+    C      = as.character(df.t$C[K])
+    nome   = paste(Regiao,LG,"x",C,sep=" ")
+    
+    cat(paste("Figura ",nome,"\n",sep=""));
+    
+    (J = df.y[df.y$gid%in%c(LG,C),]);
+    
     lim = round(seq(min(J$value),max(J$value),by=20),0)
-    end = lim[length(lim)]
-    p1=ggplot(J, aes(x=env,y=value,colour=Hibrido))+geom_point()+
-      stat_smooth(data=J, aes(x=env,y=value,fill=Hibrido,colour=Hibrido),
-                  se=smoot,method="lm",fullrange = full,size=1)+geom_point()+
+    end = lim[length(lim)];
+    
+    p1=ggplot(J, aes(x=env,y=value,colour=gid))+
+      geom_point()+
+      stat_smooth(data=J, aes(x=env,y=value,fill=gid,colour=gid),
+                  se=smoot,method="lm",fullrange = full,size=1)+
       xlab("Média Ambiental")+ylab("Média do Híbrido")+
       scale_fill_manual(values=c("royalblue","red3"))+ 
       theme_minimal()+ 
@@ -86,17 +103,17 @@ head.to.head = function(by=20,df.t,LG, C, path = getwd(),
                                      size = 1, linetype = "solid"),
             legend.position = c(.15,.90))+
       scale_colour_manual(values=c("royalblue","red3"))+graphs
+    #'---------------------------------------------------------------#
+    a = droplevels(df.y[df.y$gid%in%c(LG,C),])
     
-    a = droplevels(df[df$Hibrido%in%c(LG,C),])
-    
-    a = acast(a,Cidade~Hibrido,value.var = "value")
+    a = acast(a,Cidade~gid,value.var = "value")
     x = colnames(a)
     a = data.frame(a[complete.cases(a),])
     colnames(a) = x
     a=melt(table(colnames(a)[apply(a, 1, which.max)]))
     
     p2=ggplot(data=a,aes(x=Var1,y=value,fill=Var1))+
-      xlab("")+ylab("Número de Vitórias")+
+      xlab("")+ylab("Número de vitórias")+
       geom_bar(position = "stack",stat = "identity",colour="black",
                width = .96)+
       theme_minimal()+
@@ -105,7 +122,7 @@ head.to.head = function(by=20,df.t,LG, C, path = getwd(),
                                      size = 1, linetype = "solid"))+
       scale_fill_manual(values=c("royalblue","red3"))+
       scale_colour_manual(values=c("royalblue","red3"))+graphs
-    
+    #'---------------------------------------------------------------#
     p3=ggarrange(p1,p2,ncol=2,widths = c(1.8,.8),common.legend = F)
     b=annotate_figure(p3,
                       top = text_grob(nome, 
@@ -116,6 +133,7 @@ head.to.head = function(by=20,df.t,LG, C, path = getwd(),
     
   }
 }
+
 
 FW.out = function(y, gid, env, method = "OLS",scale=TRUE, to = c(0.5,2)){
   fit = FW(y=y,VAR = gid,ENV = env,method = method)
