@@ -23,11 +23,11 @@ trait.by.trait = function(by1=15,
     ensaio = levels(df.y$Ensaio)[j]
     J = droplevels(subset(df.y,Ensaio == ensaio))
     J$gid= droplevels(J$gid)
-    lim.y = round(seq(0.9*min(J$t1,na.rm=T),max(J$t1,na.rm=T)*1.1,by=by1),0)
+    lim.y = round(seq(0.9*min(J$t1,na.rm=T),max(J$t1,na.rm=T)*1.1,length.out = 5),0)
     end.y = lim.y[length(lim.y)]
     
     lim.x = round(seq(min(J$t2,na.rm=T)*0.9,
-                      max(J$t2,na.rm=T)*1.1,by=by2),2)
+                      max(J$t2,na.rm=T)*1.1,length.out = 4),2)
     end.x = lim.x[length(lim.x)]
     
     nome = paste(ensaio,' ',n1,' x ',n2,sep="")
@@ -68,6 +68,8 @@ graphs=   theme(plot.title = element_text(size = 15, hjust=0.5,
                 axis.text.x=element_text(size = 11))+
   theme(strip.text = element_text(face="bold", size=10,lineheight=5.0,colour="white"),
         strip.background = element_rect(fill="red3", colour="black",size=1))
+
+
 
 
 head.to.head = function(by=20,
