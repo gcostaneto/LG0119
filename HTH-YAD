@@ -58,71 +58,74 @@ head.df = function(LG,gid){
 head.to.head = function(by=20,
                         df.H,
                         df.Y,
-                        LG, 
-                        C, 
+                        LG='LG', 
+                        C='C', 
                         path = getwd(),
-                        site = "Cidade",
+                        site = "MUNI",
                         env="env.mean",
                         gid="gid",
-                        y = "value",
-                      Regiao, full=T, smoot=F){
+                        unidade = 'sc/ha',
+                        y = "PROD",
+                        type='Hibrido',
+                        Regiao='Regiao', full=T, smoot=F){
   #'---------------------------------------------------------------#
-  df.t = df.H[,c(LG,C)]
-  df.y = df.Y[,c(env,site,gid,y)]
-  names(df.y) = c("env","Cidade","gid","value")
+  df.t        = df.H[,c(LG,C)]
+  df.y        = df.Y[,c(env,site,gid,y)]
+  names(df.y) = c("env","site","gid","value")
   #'---------------------------------------------------------------#
   
-  for(K in 1:nrow(df.t)){
+  x.lab = paste0("\nMédia Ambiental (",unidade,")")
+  y.lab = paste0("Média do ",type,"(",unidade,")\n")
+
+  try(for(K in 1:nrow(df.t)){
+    LG   = as.character(df.t$LG[K])
+    C    = as.character(df.t$C[K])
+    nome = paste(Regiao,LG,"x",C,sep=" ")
     
-    Regiao = as.character(df.t$Regiao[K])
-    LG     = as.character(df.t$LG[K])
-    C      = as.character(df.t$C[K])
-    nome   = paste(Regiao,LG,"x",C,sep=" ")
+    cat(paste("Figura ",nome,"\n",sep=""))
     
-    cat(paste("Figura ",nome,"\n",sep=""));
+    J   =  df.y[df.y$gid%in%c(LG,C),]
+    lim = round(seq(0.9*min(J$value,na.rm=T),max(J$value,na.rm=T)*1.1,by=20),0)
+    end = lim[length(lim)]
     
-    (J = df.y[df.y$gid%in%c(LG,C),]);
     
-    lim = round(seq(min(J$value),max(J$value),by=20),0)
-    end = lim[length(lim)];
+    a  <- droplevels(df.y[df.y$gid%in%c(LG,C),])
+    a  <- acast(a,site~gid,fun.aggregate = mean,value.var = "value")
+    a  <- a[complete.cases(a),]
+    EC <- row.names(a)
+    DF <- droplevels(J[J$site %in% EC,])
     
-    p1=ggplot(J, aes(x=env,y=value,colour=gid))+
-      geom_point()+
-      stat_smooth(data=J, aes(x=env,y=value,fill=gid,colour=gid),
-                  se=smoot,method="lm",fullrange = full,size=1)+
-      xlab("Média Ambiental")+ylab("Média do Híbrido")+
+    p1  = ggplot(DF, aes(x=env,y=value,colour=gid))+
+          stat_smooth(data=DF, aes(x=env,y=value,fill=gid,colour=gid),se=smoot,method="lm",fullrange = full,size=1)+
+      geom_point(size=1.1)+
+      xlab(x.lab)+ylab(y.lab)+
       scale_fill_manual(values=c("royalblue","red3"))+ 
       theme_minimal()+ 
-      geom_text(aes(x = env, y = value, label = Cidade), vjust = 2, 
-                size = 2.5)+
-      scale_x_continuous(limits = c(lim[1],lim[length(lim)]),
-                         breaks=lim)+
-      scale_y_continuous(limits = c(lim[1],lim[length(lim)]),
-                         breaks=lim)+
-      theme(axis.line = element_line(colour = "black", 
-                                     size = 1, linetype = "solid"),
-            legend.position = c(.15,.90))+
-      scale_colour_manual(values=c("royalblue","red3"))+graphs
-    #'---------------------------------------------------------------#
-    a = droplevels(df.y[df.y$gid%in%c(LG,C),])
+      geom_text(data=DF,aes(x = env, y = value, label = site), vjust = 2, size = 2)+
+      scale_x_continuous(limits = c(lim[1],lim[length(lim)]),breaks=lim)+
+      scale_y_continuous(limits = c(lim[1],lim[length(lim)]),breaks=lim)+
+      theme(axis.line = element_line(colour = "black", size = 1, linetype = "solid"),legend.position = c(.15,.90))+
+      scale_colour_manual(values=c("royalblue","red3"))+graphs+ labs(fill=type,colour=type)
     
-    a = acast(a,Cidade~gid,value.var = "value")
-    x = colnames(a)
-    a = data.frame(a[complete.cases(a),])
-    colnames(a) = x
-    a=melt(table(colnames(a)[apply(a, 1, which.max)]))
+
+    a  <- acast(droplevels(DF[DF$gid%in%c(LG,C),]),site~gid,fun.aggregate = mean,value.var = "value")
+
+    
+    a = data.frame(Var1 = c(C,LG),
+                   value=c(sum(colnames(a)[apply(a, 1, which.max)] %in% C),
+                           nrow(a)-sum(colnames(a)[apply(a, 1, which.max)] %in% C)))
     
     p2=ggplot(data=a,aes(x=Var1,y=value,fill=Var1))+
-      xlab("")+ylab("Número de vitórias")+
+      xlab("\n")+ylab("Número de Vitórias")+
       geom_bar(position = "stack",stat = "identity",colour="black",
                width = .96)+
       theme_minimal()+
       theme(legend.position = "none",
             axis.line = element_line(colour = "black", 
                                      size = 1, linetype = "solid"))+
-      scale_fill_manual(values=c("royalblue","red3"))+
+      scale_fill_manual(values= c("royalblue","red3"))+
       scale_colour_manual(values=c("royalblue","red3"))+graphs
-    #'---------------------------------------------------------------#
+    
     p3=ggarrange(p1,p2,ncol=2,widths = c(1.8,.8),common.legend = F)
     b=annotate_figure(p3,
                       top = text_grob(nome, 
@@ -130,8 +133,7 @@ head.to.head = function(by=20,
     
     
     ggsave(filename= paste(nome,".png",sep=""), path = path,plot = b,width = 11.6,height = 5.6)
-    
-  }
+  })
 }
 
 
