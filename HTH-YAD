@@ -60,6 +60,8 @@ head.to.head = function(by=20,
                         df.Y,
                         LG='LG', 
                         C='C', 
+                        colorC = "green2",
+                        colorL = "red3",
                         path = getwd(),
                         site = "MUNI",
                         env="env.mean",
@@ -76,7 +78,7 @@ head.to.head = function(by=20,
   
   x.lab = paste0("\nMédia Ambiental (",unidade,")")
   y.lab = paste0("Média do ",type,"(",unidade,")\n")
-
+  
   try(for(K in 1:nrow(df.t)){
     LG   = as.character(df.t$LG[K])
     C    = as.character(df.t$C[K])
@@ -96,20 +98,20 @@ head.to.head = function(by=20,
     DF <- droplevels(J[J$site %in% EC,])
     
     p1  = ggplot(DF, aes(x=env,y=value,colour=gid))+
-          stat_smooth(data=DF, aes(x=env,y=value,fill=gid,colour=gid),se=smoot,method="lm",fullrange = full,size=1)+
+      stat_smooth(data=DF, aes(x=env,y=value,fill=gid,colour=gid),se=smoot,method="lm",fullrange = full,size=1)+
       geom_point(size=1.1)+
       xlab(x.lab)+ylab(y.lab)+
-      scale_fill_manual(values=c("royalblue","red3"))+ 
+      scale_fill_manual(values=c(colorC,colorL))+ 
       theme_minimal()+ 
       geom_text(data=DF,aes(x = env, y = value, label = site), vjust = 2, size = 2)+
       scale_x_continuous(limits = c(lim[1],lim[length(lim)]),breaks=lim)+
       scale_y_continuous(limits = c(lim[1],lim[length(lim)]),breaks=lim)+
       theme(axis.line = element_line(colour = "black", size = 1, linetype = "solid"),legend.position = c(.15,.90))+
-      scale_colour_manual(values=c("royalblue","red3"))+graphs+ labs(fill=type,colour=type)
+      scale_colour_manual(values=c(colorC,colorL))+graphs+ labs(fill=type,colour=type)
     
-
+    
     a  <- acast(droplevels(DF[DF$gid%in%c(LG,C),]),site~gid,fun.aggregate = mean,value.var = "value")
-
+    
     
     a = data.frame(Var1 = c(C,LG),
                    value=c(sum(colnames(a)[apply(a, 1, which.max)] %in% C),
@@ -123,8 +125,8 @@ head.to.head = function(by=20,
       theme(legend.position = "none",
             axis.line = element_line(colour = "black", 
                                      size = 1, linetype = "solid"))+
-      scale_fill_manual(values= c("royalblue","red3"))+
-      scale_colour_manual(values=c("royalblue","red3"))+graphs
+      scale_fill_manual(values= c(colorC,colorL))+
+      scale_colour_manual(values=c(colorC,colorL))+graphs
     
     p3=ggarrange(p1,p2,ncol=2,widths = c(1.8,.8),common.legend = F)
     b=annotate_figure(p3,
@@ -135,6 +137,7 @@ head.to.head = function(by=20,
     ggsave(filename= paste(nome,".png",sep=""), path = path,plot = b,width = 11.6,height = 5.6)
   })
 }
+
 
 
 FW.out = function(y, gid, env, method = "OLS",scale=TRUE, to = c(0.5,2)){
