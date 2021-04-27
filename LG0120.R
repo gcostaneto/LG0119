@@ -61,9 +61,9 @@ trait.by.trait = function(by1=15,
   }
 }
   
-graphs=   theme(plot.title = element_text(size = 15, hjust=0.5,
+graphs=   theme(plot.title = element_text(size = 14, hjust=0.5,
                                           face = "bold",colour="red3"),
-                text = element_text(size = 12, family = "Arial"),
+                text = element_text(size = 13, family = "Arial"),
                 axis.title = element_text(face="bold", colour="red3"),
                 axis.text.x=element_text(size = 11))+
   theme(strip.text = element_text(face="bold", size=10,lineheight=5.0,colour="white"),
