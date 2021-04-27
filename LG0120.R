@@ -93,6 +93,10 @@ head.to.head = function(by=20,
   
   x.lab = paste0("\nMédia Ambiental (",unidade,")")
   y.lab = paste0("Média do ",type,"(",unidade,")\n")
+  
+    
+ # x.lab = paste0("\nEnvironmental Mean (",unidade,")")
+  #y.lab = paste0("Expected Mean (",unidade,")\n")
 
   try(for(K in 1:nrow(df.t)){
     LG   = as.character(df.t$LG[K])
