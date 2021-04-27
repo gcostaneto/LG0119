@@ -34,8 +34,8 @@ trait.by.trait = function(by1=15,
     cat(paste0(nome),'\n')
     require(ggrepel)
     p1=ggplot(J, aes(x=t2,y= t1,colour=gid))+
-      geom_hline(yintercept = mean(J$t1),size=.2,linetype='dashed')+
-      geom_vline(xintercept = mean(J$t2),size=.2,linetype='dashed')+
+      geom_hline(yintercept = mean(J$t1,na.rm=T),size=.2,linetype='dashed')+
+      geom_vline(xintercept = mean(J$t2,na.rm=T),size=.2,linetype='dashed')+
       geom_point() + facet_grid(~Ensaio)+
       xlab(paste0('\n',n2,' (',u2,')'))+ylab(paste0(n1,' (',u1,')\n'))+
       # scale_fill_manual(values=c("royalblue","red3"))+ 
